@@ -14,7 +14,8 @@
   },
   "devDependencies": {
     "concurrently": "4.1.0",
-    "nodemon": "1.19.1"
+    "nodemon": "1.19.1",
+    "sequelize-cli": "^6.6.0"
   },
   "engines": {
     "node": ">=10.16.3"
