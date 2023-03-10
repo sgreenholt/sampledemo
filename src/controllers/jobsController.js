@@ -1,11 +1,6 @@
 const Sequelize = require("sequelize");
 const parseLimit = require("../utils/parseLimit");
-const codes = {
-  WRONG_CLIENT: 4000,
-  PAYMENT_JOB_NOT_FOUND: 5000,
-  PAYMENT_INSUFFICIENT_AMOUNT: 5001,
-  PAYMENT_WRONG_AMOUNT: 5002,
-};
+const { codes } = require("../config/errors");
 
 /**
  * /jobs/unpaid Gets all unpaid jobs for a user (***either*** a client or contractor), for ***active contracts only***.
@@ -51,6 +46,7 @@ exports.getUnpaidJobs = async function (req, res) {
     res.status(500, err.message);
   }
 };
+
 /**
  * Pay for a job: a client can only pay if his balance >= the amount to pay.
  * The amount should be moved from the client's balance to the contractor balance.
@@ -71,7 +67,7 @@ exports.payForJob = async function (req, res) {
     const amount = parseFloat(req.body.amount || 0);
 
     if (profile.type !== "client") {
-      return res.json(403, {
+      return res.status(403).json({
         success: false,
         code: codes.WRONG_CLIENT,
         message:
@@ -80,7 +76,7 @@ exports.payForJob = async function (req, res) {
     }
 
     if (amount <= 0) {
-      return res.json(500, {
+      return res.status(500).json({
         success: false,
         code: codes.PAYMENT_WRONG_AMOUNT,
         message: "Wrong amount",
@@ -88,7 +84,7 @@ exports.payForJob = async function (req, res) {
     }
 
     if (profile.balance < amount) {
-      return res.json(500, {
+      return res.status(500).json({
         success: false,
         code: codes.PAYMENT_INSUFFICIENT_AMOUNT,
         message: "Insufficient amount to pay the bill",
@@ -108,7 +104,7 @@ exports.payForJob = async function (req, res) {
     });
 
     if (!matchingJob) {
-      return res.json(404, {
+      return res.status(404).json({
         success: false,
         code: codes.PAYMENT_JOB_NOT_FOUND,
       });
@@ -134,7 +130,7 @@ exports.payForJob = async function (req, res) {
       // If the execution reaches this line, an error was thrown.
       // We rollback the transaction.
       await t.rollback();
-      return res.json(500, { error, success: false });
+      return res.status(500).json({ error, success: false });
     }
 
     res.json({ success: true, message: "Payment updated" });
