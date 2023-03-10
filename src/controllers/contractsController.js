@@ -1,4 +1,4 @@
-const Sequelize = require("sequelize");
+const {Sequelize, Op} = require("sequelize");
 const { defaultLimit } = require("../config/blueprints");
 
 /**
@@ -64,7 +64,7 @@ exports.getProfileContracts = async function (req, res) {
       where: Sequelize.and(
         {
           status: {
-            not: "terminated",
+            [Op.not]: "terminated",
           },
         },
         Sequelize.or(
