@@ -1,5 +1,5 @@
-const {Sequelize, Op} = require("sequelize");
-const { defaultLimit } = require("../config/blueprints");
+const { Sequelize, Op } = require("sequelize");
+const parseLimit = require("../utils/parseLimit");
 
 /**
  * Exercise 1: it should return the contract only if it belongs to the profile calling.
@@ -53,14 +53,13 @@ exports.getProfileContract = async function (req, res) {
  */
 exports.getProfileContracts = async function (req, res) {
   try {
-    const limit = req.query.limit || defaultLimit;
-    const skip = req.query.skip || 0;
     const profileId = req.profile.id;
+    const limitAndOffset = parseLimit(req);
+
     // @todo: move to respective service class
     const { Contract } = req.app.get("models");
     const contracts = await Contract.findAll({
-      limit,
-      offset: skip,
+      ...limitAndOffset,
       where: Sequelize.and(
         {
           status: {
