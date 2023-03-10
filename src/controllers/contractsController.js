@@ -16,6 +16,9 @@ exports.getProfileContract = async function (req, res) {
     // @todo: move to respective service class
     const { Contract } = req.app.get("models");
     const { id } = req.params;
+    if (!id) {
+      return res.status(404).end();
+    }
     const contract = await Contract.findOne({
       where: Sequelize.and(
         { id },
